@@ -46,7 +46,7 @@ static InterpretResult run() {
 #define DISPATCH() \
     do { \
         INSPECT_STACK(); \
-        goto *dispath_table[*vm.ip++]; \
+        goto *dispatch_table[*vm.ip++]; \
     } while (false)
 
 #define BINARY_OP(op) \
@@ -58,7 +58,7 @@ static InterpretResult run() {
         DISPATCH(); \
     } while (false)
 
-    static void **dispath_table[] = {
+    static void **dispatch_table[] = {
        [OP_CONSTANT] = &&CONSTANT,
        [OP_RETURN] = &&RETURN,
        [OP_NEGATE] = &&NEGATE,
