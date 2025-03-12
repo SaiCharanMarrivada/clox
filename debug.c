@@ -16,7 +16,7 @@ int simple_instruction(const char *name, int offset) {
 }
 
 void print_value(Value value) {
-    printf("%g", value);
+    printf("%g\n", value);
 }
 
 int constant_instruction(const char *name, Chunk *chunk, int offset) {
