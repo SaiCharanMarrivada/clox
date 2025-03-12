@@ -1,3 +1,6 @@
+#include <stdarg.h>
+#include <stdbool.h>
+#include <stdio.h>
 #include "chunk.h"
 #include "common.h"
 #include "compiler.h"
@@ -31,6 +34,19 @@ void free_vm() {
 
 }
 
+static void runtime_error(const char *format, ...) {
+    va_list args;
+    va_start(args, format);
+    vfprintf(stderr, format, args);
+    va_end(args);
+    fputs("\n", stderr);
+
+    size_t index = vm.ip - vm.chunk->code - 1;
+    int line = vm.chunk->lines[index];
+    fprintf(stderr, "[line %d] in script\n", line);
+    vm.top = vm.stack;
+}
+
 void push(Value value) {
     *vm.top = value;
     vm.top++;
@@ -41,6 +57,10 @@ Value pop() {
     return *vm.top;
 }
 
+bool is_false(Value value) {
+    return IS_NIL(value) || (IS_BOOL(value) && !AS_BOOL(value));
+}
+
 
 static InterpretResult run() {
 #define DISPATCH() \
@@ -49,12 +69,16 @@ static InterpretResult run() {
         goto *dispatch_table[*vm.ip++]; \
     } while (false)
 
-#define BINARY_OP(op) \
+#define BINARY_OP(value_type, op) \
     do { \
         INSPECT_STACK(); \
         Value b = pop(); \
         Value a = pop(); \
-        push(a op b); \
+        if (!IS_NUMBER(b) || !IS_NUMBER(a)) { \
+            runtime_error("Operands must be numbers"); \
+            return INTERPRET_RUNTIME_ERROR; \
+        } \
+        push(value_type(AS_NUMBER(a) op AS_NUMBER(b))); \
         DISPATCH(); \
     } while (false)
 
@@ -65,7 +89,14 @@ static InterpretResult run() {
        [OP_ADD] = &&ADD,
        [OP_SUBTRACT] = &&SUBTRACT,
        [OP_MULTIPLY] = &&MULTIPLY,
-       [OP_DIVIDE] = &&DIVIDE
+       [OP_DIVIDE] = &&DIVIDE,
+       [OP_TRUE] = &&TRUE,
+       [OP_FALSE] = &&FALSE,
+       [OP_NIL] = &&NIL,
+       [OP_NOT] = &&NOT,
+       [OP_EQUAL] = &&EQUAL,
+       [OP_GREATER] = &&GREATER,
+       [OP_LESS] = &&LESS
     };
     DISPATCH();
 
@@ -75,20 +106,53 @@ CONSTANT:
     DISPATCH();
 
 NEGATE:
-    push(-pop());
+    if (IS_NUMBER(vm.top[-1])) {
+        push(NUMBER_VAL(-AS_NUMBER(pop())));
+        DISPATCH();
+    } else {
+        runtime_error("Operand must be a number.");
+        return INTERPRET_RUNTIME_ERROR;
+    }
+
+TRUE:
+    push(BOOL_VAL(true));
     DISPATCH();
 
+FALSE:
+    push(BOOL_VAL(false));
+    DISPATCH();
+
+NIL:
+    push(NIL_VAL);
+    DISPATCH();
+
+NOT:
+    push(BOOL_VAL(is_false(pop())));
+    DISPATCH();
+
+EQUAL:
+    Value b = pop();
+    Value a = pop();
+    push(BOOL_VAL(is_equal(a, b)));
+    DISPATCH();
+
+GREATER:
+    BINARY_OP(BOOL_VAL, >);
+
+LESS:
+    BINARY_OP(BOOL_VAL, <);
+
 ADD:
-    BINARY_OP(+);
+    BINARY_OP(NUMBER_VAL, +);
 
 SUBTRACT:
-    BINARY_OP(-);
+    BINARY_OP(NUMBER_VAL, -);
 
 MULTIPLY:
-    BINARY_OP(*);
+    BINARY_OP(NUMBER_VAL, *);
 
 DIVIDE:
-    BINARY_OP(/);
+    BINARY_OP(NUMBER_VAL, /);
 
 RETURN:
     print_value(pop());
