@@ -1,4 +1,3 @@
-#include <bits/floatn-common.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "chunk.h"
@@ -6,6 +5,10 @@
 #include "compiler.h"
 #include "scanner.h"
 #include "value.h"
+
+#ifdef DEBUG_PRINT_CODE
+#include "debug.h"
+#endif
 
 typedef struct {
     Token previous;
@@ -149,6 +152,10 @@ static void emit_bytes(uint8_t byte1, uint8_t byte2) {
 }
 
 static void end_compiler() {
+#ifdef DEBUG_PRINT_CODE
+    if (!parser.had_error)
+        disassemble_chunk(current_chunk(), "code");
+#endif
     return emit_byte(OP_RETURN);
 }
 
