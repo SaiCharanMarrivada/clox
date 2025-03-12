@@ -19,23 +19,21 @@ void init_scanner(const char *source) {
 }
 
 static Token make_token(TokenType type) {
-    Token token = {
+    return (Token){
         .type = type,
         .start = scanner.start,
         .length = (int)(scanner.current - scanner.start),
         .line = scanner.line
     };
-    return token;
 }
 
 static Token error_token(const char *message) {
-    Token token = {
+    return (Token){
         .type = TOKEN_ERROR,
         .start = message,
         .length = strlen(message),
         .line = scanner.line
     };
-    return token;
 }
 
 static bool match(char expected) {
