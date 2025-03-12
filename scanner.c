@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <string.h>
 #include <ctype.h>
 #include "common.h"
@@ -39,7 +40,9 @@ static Token error_token(const char *message) {
 
 static bool match(char expected) {
     if (*scanner.current == '\0') return false;
-    return (*scanner.current++ == expected);
+    if (*scanner.current != expected) return false;
+    scanner.current++;
+    return true;
 }
 
 static void skip_whitespace_and_comments() {
