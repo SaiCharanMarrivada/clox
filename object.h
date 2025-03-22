@@ -9,7 +9,7 @@
 #define AS_STRING(value) (((String *)AS_OBJECT(value)))
 
 typedef enum {
-    STRING,
+    STRING
 } ObjectType;
 
 struct Object {
@@ -18,7 +18,7 @@ struct Object {
 };
 
 struct String {
-    Object *object;
+    Object object;
     int length;
     char *data;
 };
@@ -28,7 +28,7 @@ static inline bool is_objecttype(Value value, ObjectType type) {
 }
 
 String *copy_string(const char *data, int length);
-String *allocate_string(char *data, int length);
+String *take_string(char *data, int length);
 void print_object(Value value);
 #endif
 

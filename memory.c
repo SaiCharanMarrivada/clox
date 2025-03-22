@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include "memory.h"
 #include "object.h"
+#include "value.h"
+#include "vm.h"
 
 void *reallocate(void *pointer, size_t old_size, size_t new_size) {
     if (new_size == 0) {
@@ -20,5 +22,14 @@ void free_object(Object *object) {
             FREE_ARRAY(char, string->data, string->length + 1);
             FREE(String, object);
             break;
+    }
+}
+
+void free_objects() {
+    Object *object = vm.objects;
+    while (object) {
+        Object *next = object->next;
+        free_object(object);
+        object = next;
     }
 }

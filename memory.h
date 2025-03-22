@@ -20,5 +20,5 @@
 #define FREE(type, pointer) reallocate(pointer, sizeof(type), 0)
 
 void *reallocate(void *pointer, size_t old_size, size_t new_size);
-void free_object(Object *object);
+void free_objects();
 #endif

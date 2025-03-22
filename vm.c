@@ -36,12 +36,7 @@ void init_vm() {
 }
 
 void free_vm() {
-    Object *object = vm.objects;
-    while (object) {
-        Object *next = object->next;
-        free_object(object);
-        object = next;
-    }
+    free_objects();
 }
 
 static void runtime_error(const char *format, ...) {
@@ -163,7 +158,7 @@ ADD: {
         memcpy(data, s1->data, s1->length);
         memcpy(data + s1->length, s2->data, s2->length);
         data[length] = '\0';
-        String *result = allocate_string(data, length);
+        String *result = take_string(data, length);
         push(OBJECT_VAL(result));
         DISPATCH();
     } else if (IS_NUMBER(a) && IS_NUMBER(b)) {
@@ -204,7 +199,6 @@ InterpretResult interpret(const char *source) {
     InterpretResult result = run();
     free_chunk(&chunk);
     return result;
-
 }
 
 

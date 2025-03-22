@@ -21,8 +21,12 @@ String *allocate_string(char *buffer, int length) {
     String *string = ALLOCATE_OBJECT(String, STRING);
     string->length = length;
     string->data = buffer;
+    return string;
 }
 
+String *take_string(char *buffer, int length) {
+    return allocate_string(buffer, length);
+}
 
 String *copy_string(const char *data, int length) {
     char *buffer = ALLOCATE(char, length + 1); // +1 for NULL character
