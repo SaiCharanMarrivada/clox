@@ -76,6 +76,6 @@ int main(int argc, char *argv[]) {
     }
 
 
-    free_vm();
+    // free_vm();
     return 0;
 }

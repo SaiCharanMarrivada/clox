@@ -5,7 +5,7 @@
 #include "compiler.h"
 #include "scanner.h"
 #include "value.h"
-
+#include "object.h"
 #ifdef DEBUG_PRINT_CODE
 #include "debug.h"
 #endif
@@ -44,6 +44,7 @@ static void binary();
 static void unary();
 static void number();
 static void literal();
+static void string();
 
 ParseRule rules[] = {
     [TOKEN_LEFT_PAREN] = {grouping, NULL, PREC_NONE},
@@ -66,7 +67,7 @@ ParseRule rules[] = {
     [TOKEN_LESS] = {NULL, binary, PREC_COMPARISON},
     [TOKEN_LESS_EQUAL] = {NULL, binary, PREC_COMPARISON},
     [TOKEN_IDENTIFIER] = {NULL, NULL, PREC_NONE},
-    [TOKEN_STRING] = {NULL, NULL, PREC_NONE},
+    [TOKEN_STRING] = {string, NULL, PREC_NONE},
     [TOKEN_NUMBER] = {number, NULL, PREC_NONE},
     [TOKEN_AND] = {NULL, NULL, PREC_NONE},
     [TOKEN_CLASS] = {NULL, NULL, PREC_NONE},
@@ -151,6 +152,8 @@ static void emit_bytes(uint8_t byte1, uint8_t byte2) {
     emit_byte(byte2);
 }
 
+
+
 static void end_compiler() {
 #ifdef DEBUG_PRINT_CODE
     if (!parser.had_error)
@@ -187,6 +190,11 @@ static uint8_t make_constant(Value value) {
         return 0;
     }
     return (uint8_t)constant;
+}
+
+static void string() {
+    String *s = copy_string(parser.previous.start + 1, parser.previous.length - 2);
+    emit_bytes(OP_CONSTANT, make_constant(OBJECT_VAL(s)));
 }
 
 static void grouping() {

@@ -7,6 +7,10 @@
 #include "debug.h"
 #include "value.h"
 #include "vm.h"
+#include "object.h"
+#include <string.h>
+#include <time.h>
+#include "memory.h"
 
 VM vm;
 
@@ -28,10 +32,16 @@ VM vm;
 
 void init_vm() {
     vm.top = vm.stack;
+    vm.objects = NULL;
 }
 
 void free_vm() {
-
+    Object *object = vm.objects;
+    while (object) {
+        Object *next = object->next;
+        free_object(object);
+        object = next;
+    }
 }
 
 static void runtime_error(const char *format, ...) {
@@ -142,8 +152,28 @@ GREATER:
 LESS:
     BINARY_OP(BOOL_VAL, <);
 
-ADD:
-    BINARY_OP(NUMBER_VAL, +);
+ADD: {
+    Value b = pop();
+    Value a = pop();
+    if (IS_STRING(a) && IS_STRING(b)) {
+        String *s1 = AS_STRING(a);
+        String *s2 = AS_STRING(b);
+        int length = s1->length + s2->length;
+        char *data = ALLOCATE(char, length + 1);
+        memcpy(data, s1->data, s1->length);
+        memcpy(data + s1->length, s2->data, s2->length);
+        data[length] = '\0';
+        String *result = allocate_string(data, length);
+        push(OBJECT_VAL(result));
+        DISPATCH();
+    } else if (IS_NUMBER(a) && IS_NUMBER(b)) {
+        push(NUMBER_VAL(AS_NUMBER(a) + AS_NUMBER(b)));
+        DISPATCH();
+    } else {
+        runtime_error("Only strings or numbers are allowed.");
+        return INTERPRET_RUNTIME_ERROR;
+    }
+}
 
 SUBTRACT:
     BINARY_OP(NUMBER_VAL, -);

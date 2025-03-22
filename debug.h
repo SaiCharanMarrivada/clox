@@ -6,6 +6,5 @@
 
 void disassemble_chunk(Chunk *chunk, const char *name);
 int disassemble_instruction(Chunk *chunk, int offset);
-void print_value(Value value);
 
 #endif

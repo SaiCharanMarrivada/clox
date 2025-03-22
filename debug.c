@@ -15,20 +15,6 @@ int simple_instruction(const char *name, int offset) {
     return offset + 1;
 }
 
-void print_value(Value value) {
-    switch (value.type) {
-        case VAL_BOOL:
-            printf(AS_BOOL(value) ? "true" : "false");
-            break;
-        case VAL_NIL:
-            printf("nil");
-            break;
-        case VAL_NUMBER:
-            printf("%g", AS_NUMBER(value));
-            break;
-    }
-}
-
 int constant_instruction(const char *name, Chunk *chunk, int offset) {
     uint8_t constant = chunk->code[offset + 1];
     printf("%-16s %4d '", name, constant);
