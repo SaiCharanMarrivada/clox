@@ -1,6 +1,7 @@
 #ifndef VM_H
 #define VM_H
 
+#include "table.h"
 #include "chunk.h"
 #include "value.h"
 #define STACK_MAX 256
@@ -10,6 +11,7 @@ typedef struct {
     uint8_t *ip;
     Value stack[STACK_MAX];
     Value *top;
+    Table strings;
     Object *objects;
 } VM;
 

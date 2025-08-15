@@ -5,4 +5,6 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#define UNREACHABLE() __builtin_unreachable()
+
 #endif

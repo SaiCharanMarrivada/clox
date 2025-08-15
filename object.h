@@ -21,6 +21,7 @@ struct String {
     Object object;
     int length;
     char *data;
+    uint32_t hash;
 };
 
 static inline bool is_objecttype(Value value, ObjectType type) {

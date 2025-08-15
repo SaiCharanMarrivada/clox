@@ -39,14 +39,9 @@ bool is_equal(Value a, Value b) {
         case VAL_NUMBER:
             return AS_NUMBER(a) == AS_NUMBER(b);
         case VAL_OBJECT:
-            String *s1 = AS_STRING(a);
-            String *s2 = AS_STRING(b);
-            if (s1->length == s2->length) {
-                return memcmp(s1, s2, s1->length) == 0;
-            }
-            return false;
+            return AS_OBJECT(a) == AS_OBJECT(b);
         default:
-            __builtin_unreachable();
+            UNREACHABLE();
     }
 }
 

@@ -223,7 +223,7 @@ static void unary() {
             break;
 
         default:
-            __builtin_unreachable();
+            UNREACHABLE();
     }
 }
 
@@ -264,7 +264,7 @@ static void binary() {
             emit_byte(OP_DIVIDE);
             break;
         default:
-            __builtin_unreachable();
+            UNREACHABLE();
     }
 }
 
@@ -280,7 +280,7 @@ static void literal() {
             emit_byte(OP_TRUE);
             break;
         default:
-            __builtin_unreachable();
+            UNREACHABLE();
     }
 }
 
