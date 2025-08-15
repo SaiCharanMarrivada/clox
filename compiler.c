@@ -152,8 +152,6 @@ static void emit_bytes(uint8_t byte1, uint8_t byte2) {
     emit_byte(byte2);
 }
 
-
-
 static void end_compiler() {
 #ifdef DEBUG_PRINT_CODE
     if (!parser.had_error)

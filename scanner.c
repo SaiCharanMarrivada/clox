@@ -125,7 +125,7 @@ static TokenType identifier_type() {
     return TOKEN_IDENTIFIER;
 }
 
-static Token identifer() {
+static Token identifier() {
     while (isalnum(*scanner.current) || *scanner.current == '_') scanner.current++;
     return make_token(identifier_type());
 }
@@ -160,7 +160,7 @@ Token scan_token() {
 
     if (*scanner.current == '\0') return make_token(TOKEN_EOF);
 
-    if (*scanner.current == '_' || isalpha(*scanner.current)) return identifer();
+    if (*scanner.current == '_' || isalpha(*scanner.current)) return identifier();
     if (isdigit(*scanner.current)) return number();
 
     switch (*scanner.current++) {
@@ -199,6 +199,4 @@ Token scan_token() {
     }
 
     return error_token("Unexpected character");
-
-
 }
