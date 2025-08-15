@@ -149,4 +149,5 @@ String* table_find_string(
         }
         index = (index + 1) & (capacity - 1);
     }
+    UNREACHABLE();
 }
