@@ -116,7 +116,7 @@ bool table_delete(Table *table, String *key) {
             keys[index] = NULL;
             table->values[index] = BOOL_VAL(true);
             return true;
-        } else if (keys[index] == NULL) {
+        } else if (keys[index] == NULL && IS_NIL(table->values[index])) {
             return false;
         }
         index = (index + 1) & (capacity - 1);
