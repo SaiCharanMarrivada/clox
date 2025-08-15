@@ -159,7 +159,7 @@ static void end_compiler() {
     if (!parser.had_error)
         disassemble_chunk(current_chunk(), "code");
 #endif
-    return emit_byte(OP_RETURN);
+    emit_byte(OP_RETURN);
 }
 
 static void parse_precedence(Precedence precedence) {

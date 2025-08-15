@@ -69,6 +69,9 @@ bool is_false(Value value) {
 }
 
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
+
 static InterpretResult run() {
 #define DISPATCH() \
     do { \
@@ -185,6 +188,7 @@ RETURN:
     print_value(pop());
     return INTERPRET_OK;
 }
+#pragma GCC diagnostic pop
 
 InterpretResult interpret(const char *source) {
     Chunk chunk;
