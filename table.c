@@ -21,7 +21,7 @@ void free_table(Table *table) {
     init_table(table);
 }
 
-void grow_and_copy(Table *table, int new_capacity) {
+static void rehash_table(Table *table, int new_capacity) {
     String **keys = ALLOCATE(String *, new_capacity);
     Value *values = ALLOCATE(Value, new_capacity);
 
@@ -59,7 +59,7 @@ void grow_and_copy(Table *table, int new_capacity) {
 bool table_set(Table *table, String *key, Value value) {
     if (table->count + 1 > table->capacity * LOAD_FACTOR) {
         int capacity = GROW_CAPACITY(table->capacity);
-        grow_and_copy(table, capacity);
+        rehash_table(table, capacity);
     }
     int capacity = table->capacity;
     uint32_t index = key->hash & (capacity - 1);
