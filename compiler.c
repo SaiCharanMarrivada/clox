@@ -97,6 +97,7 @@ static Chunk *current_chunk() {
     return compiling_chunk;
 }
 
+
 static void error_at(Token *token, const char *message) {
     if (parser.panic_mode) return;
     parser.panic_mode = true;
@@ -133,6 +134,14 @@ static void advance() {
 
         error_at_current(parser.current.start);
     }
+}
+
+static bool match(TokenType type) {
+    if (parser.current.type != type) {
+        return false;
+    }
+    advance();
+    return true;
 }
 
 static void consume(TokenType type, const char *message) {
@@ -180,6 +189,31 @@ static void parse_precedence(Precedence precedence) {
 static void expression() {
     parse_precedence(PREC_ASSIGNMENT);
 }
+
+static void print_statement() {
+    expression();
+    consume(TOKEN_SEMICOLON, "Expect ';' after the value.");
+    emit_byte(OP_PRINT);
+}
+
+static void expression_statement() {
+    expression();
+    consume(TOKEN_SEMICOLON, "Expect ';' after the expression.");
+    emit_byte(OP_POP);
+}
+
+static void statement() {
+    if (match(TOKEN_PRINT)) {
+        print_statement();
+    } else {
+        expression_statement();
+    }
+}
+
+static void declaration() {
+    statement();
+}
+
 
 static uint8_t make_constant(Value value) {
     int constant = add_constant(current_chunk(), value);
@@ -288,8 +322,9 @@ bool compile(const char *source, Chunk *chunk) {
     parser.panic_mode = false;
     parser.had_error = false;
     advance();
-    expression();
+    while (!match(TOKEN_EOF)) {
+        declaration();
+    }
     end_compiler();
-    consume(TOKEN_EOF, "Expect end of expression");
     return !parser.had_error;
 }

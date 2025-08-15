@@ -96,6 +96,7 @@ static InterpretResult run() {
        [OP_CONSTANT] = &&CONSTANT,
        [OP_RETURN] = &&RETURN,
        [OP_NEGATE] = &&NEGATE,
+       [OP_PRINT] = &&PRINT,
        [OP_ADD] = &&ADD,
        [OP_SUBTRACT] = &&SUBTRACT,
        [OP_MULTIPLY] = &&MULTIPLY,
@@ -104,15 +105,26 @@ static InterpretResult run() {
        [OP_FALSE] = &&FALSE,
        [OP_NIL] = &&NIL,
        [OP_NOT] = &&NOT,
+       [OP_POP] = &&POP,
        [OP_EQUAL] = &&EQUAL,
        [OP_GREATER] = &&GREATER,
        [OP_LESS] = &&LESS
     };
     DISPATCH();
 
-CONSTANT:
+CONSTANT: {
     Value constant = vm.chunk->constants.values[*vm.ip++];
     push(constant);
+    DISPATCH();
+}
+    
+PRINT:
+    print_value(pop());
+    printf("\n");
+    DISPATCH();
+
+POP:
+    pop();
     DISPATCH();
 
 NEGATE:
@@ -185,6 +197,7 @@ DIVIDE:
     BINARY_OP(NUMBER_VAL, /);
 
 RETURN:
+    UNREACHABLE(); // currently
     print_value(pop());
     return INTERPRET_OK;
 }
