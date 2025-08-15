@@ -92,10 +92,7 @@ bool table_get(Table *table, String *key, Value *value) {
         if (keys[index] == NULL) {
             if (IS_NIL(table->values[index])) {
                 return false;
-            // continue probing if it is a tombstone
-            } else {
-                continue;
-            }
+            } 
           // found key
         } else if (keys[index] == key) {
             *value = table->values[index];
