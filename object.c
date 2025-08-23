@@ -62,5 +62,7 @@ void print_object(Value value) {
         case STRING:
             printf("%s", AS_CSTRING(value));
             break;
+        default:
+            UNREACHABLE();
     }
 }
