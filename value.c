@@ -5,10 +5,10 @@
 #include "object.h"
 #include "string.h"
 
-void init_value_array(ValueArray *array) {
+inline void init_value_array(ValueArray *array, bool with_capacity) {
     array->count = 0;
-    array->capacity = 8;
-    array->values = ALLOCATE(Value, 8);
+    array->capacity = with_capacity ? 8 : 0;
+    array->values = with_capacity ? ALLOCATE(Value, 8) : NULL;
 }
 
 void write_value_array(ValueArray *array, Value value) {
@@ -25,7 +25,7 @@ void write_value_array(ValueArray *array, Value value) {
 
 void free_value_array(ValueArray *array) {
     FREE_ARRAY(Value, array->values, array->capacity);
-    init_value_array(array);
+    init_value_array(array, false);
 }
 
 bool is_equal(Value a, Value b) {

@@ -225,7 +225,7 @@ RETURN:
 
 InterpretResult interpret(const char *source) {
     Chunk chunk;
-    init_chunk(&chunk);
+    init_chunk(&chunk, true);
     // try to compile the source
     if (!compile(source, &chunk)) {
         free_chunk(&chunk);

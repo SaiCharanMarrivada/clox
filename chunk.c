@@ -1,16 +1,17 @@
 #include <endian.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 #include "chunk.h"
 #include "memory.h"
 #include "value.h"
 
-void init_chunk(Chunk *chunk) {
+inline void init_chunk(Chunk *chunk, bool with_capacity) {
     chunk->count = 0;
-    chunk->capacity = 8;
-    chunk->code = ALLOCATE(uint8_t, 8);
-    chunk->lines = ALLOCATE(int, 8);
-    init_value_array(&chunk->constants);
+    chunk->capacity = with_capacity ? 8 : 0;
+    chunk->code = with_capacity ? ALLOCATE(uint8_t, 8) : NULL;
+    chunk->lines = with_capacity ? ALLOCATE(int, 8) : NULL;
+    init_value_array(&chunk->constants, with_capacity);
 }
 
 void write_chunk(Chunk *chunk, uint8_t byte, int line) {
@@ -31,7 +32,7 @@ void free_chunk(Chunk *chunk) {
     FREE_ARRAY(uint8_t, chunk->code, chunk->capacity);
     FREE_ARRAY(int, chunk->lines, chunk->capacity);
     free_value_array(&chunk->constants);
-    init_chunk(chunk);
+    init_chunk(chunk, false);
 }
 
 int add_constant(Chunk *chunk, Value value) {

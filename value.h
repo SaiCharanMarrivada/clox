@@ -46,7 +46,7 @@ typedef struct {
     Value *values;
 } ValueArray;
 
-void init_value_array(ValueArray *array);
+void init_value_array(ValueArray *array, bool with_capacity);
 void write_value_array(ValueArray *array, Value value);
 void free_value_array(ValueArray *array);
 bool is_equal(Value a, Value b);
