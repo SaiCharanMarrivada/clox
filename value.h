@@ -6,8 +6,8 @@ typedef struct Object Object;
 typedef struct String String;
 
 typedef enum {
-    VAL_BOOL,
     VAL_NIL,
+    VAL_BOOL,
     VAL_NUMBER,
     VAL_OBJECT
 } ValueType;

@@ -12,7 +12,7 @@ void init_value_array(ValueArray *array) {
 }
 
 void write_value_array(ValueArray *array, Value value) {
-    if (array->capacity < array->count + 1) {
+    if UNLIKELY(array->capacity < array->count + 1) {
         int old_capacity = array->capacity;
         array->capacity = 2 * old_capacity;
         array->values =
