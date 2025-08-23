@@ -8,22 +8,29 @@
 
 #define LOAD_FACTOR 0.75
 
-void init_table(Table *table) {
+__attribute__((always_inline))
+inline void init_table(Table *table, bool with_capacity) {
     table->count = 0;
-    table->capacity = 8;
-    table->keys = ALLOCATE(String *, table->capacity);
-    table->values = ALLOCATE(Value, table->capacity);
+    if (with_capacity) {
+        table->capacity = 8;
+        table->keys = ALLOCATE(String *, table->capacity);
+        table->values = ALLOCATE(Value, table->capacity);
 
-    for (int i = 0; i < 8; i++) {
-        table->keys[i] = NULL;
-        table->values[i] = NIL_VAL;
+        for (int i = 0; i < 8; i++) {
+            table->keys[i] = NULL;
+            table->values[i] = NIL_VAL;
+        }
+    } else {
+        table->capacity = 0;
+        table->keys = NULL;
+        table->values = NULL;
     }
 }
 
 void free_table(Table *table) {
     FREE_ARRAY(String *, table->keys, table->capacity);
     FREE_ARRAY(Value, table->values, table->capacity);
-    init_table(table);
+    init_table(table, false);
 }
 
 static void rehash_table(Table *table, int new_capacity) {
@@ -77,8 +84,9 @@ bool table_set(Table *table, String *key, Value value) {
             }
             keys[index] = key;
             table->values[index] = value;
-            return true;
+            return true; // new key
         } else if (keys[index] == key) {
+            table->values[index] = value;
             return false;
         }
         index = (index + 1) & (capacity - 1);

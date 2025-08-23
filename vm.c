@@ -33,8 +33,8 @@ VM vm;
 void init_vm() {
     vm.top = vm.stack;
     vm.objects = NULL;
-    init_table(&vm.strings);
-    init_table(&vm.globals);
+    init_table(&vm.strings, true);
+    init_table(&vm.globals, true);
 }
 
 void free_vm() {
