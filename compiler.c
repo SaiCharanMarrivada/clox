@@ -44,6 +44,7 @@ static void binary();
 static void unary();
 static void number();
 static void literal();
+static void variable();
 static void string();
 static uint8_t make_constant(Value value);
 
@@ -67,7 +68,7 @@ ParseRule rules[] = {
     [TOKEN_GREATER_EQUAL] = {NULL, binary, PREC_COMPARISON},
     [TOKEN_LESS] = {NULL, binary, PREC_COMPARISON},
     [TOKEN_LESS_EQUAL] = {NULL, binary, PREC_COMPARISON},
-    [TOKEN_IDENTIFIER] = {NULL, NULL, PREC_NONE},
+    [TOKEN_IDENTIFIER] = {variable, NULL, PREC_NONE},
     [TOKEN_STRING] = {string, NULL, PREC_NONE},
     [TOKEN_NUMBER] = {number, NULL, PREC_NONE},
     [TOKEN_AND] = {NULL, NULL, PREC_NONE},
@@ -189,6 +190,12 @@ static void parse_precedence(Precedence precedence) {
 
 static void expression() {
     parse_precedence(PREC_ASSIGNMENT);
+}
+
+static void variable() {
+    Token name = parser.previous;
+    Value symbol = OBJECT_VAL(copy_string(name.start, name.length));
+    emit_bytes(OP_GET_GLOBAL, make_constant(symbol));
 }
 
 static void print_statement() {

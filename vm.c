@@ -34,10 +34,12 @@ void init_vm() {
     vm.top = vm.stack;
     vm.objects = NULL;
     init_table(&vm.strings);
+    init_table(&vm.globals);
 }
 
 void free_vm() {
     free_table(&vm.strings);
+    free_table(&vm.globals);
     free_objects();
 }
 
@@ -73,6 +75,7 @@ bool is_false(Value value) {
 #pragma GCC diagnostic ignored "-Wpedantic"
 
 static InterpretResult run() {
+    Value *values = vm.chunk->constants.values;
 #define DISPATCH() \
     do { \
         INSPECT_STACK(); \
@@ -108,12 +111,14 @@ static InterpretResult run() {
        [OP_POP] = &&POP,
        [OP_EQUAL] = &&EQUAL,
        [OP_GREATER] = &&GREATER,
-       [OP_LESS] = &&LESS
+       [OP_LESS] = &&LESS,
+       [OP_DEFINE_GLOBAL] = &&DEFINE_GLOBAL,
+       [OP_GET_GLOBAL] = &&GET_GLOBAL
     };
     DISPATCH();
 
 CONSTANT: {
-    Value constant = vm.chunk->constants.values[*vm.ip++];
+    Value constant = values[*vm.ip++];
     push(constant);
     DISPATCH();
 }
@@ -135,6 +140,22 @@ NEGATE:
         runtime_error("Operand must be a number.");
         return INTERPRET_RUNTIME_ERROR;
     }
+
+DEFINE_GLOBAL: 
+    String *name = AS_STRING(values[*vm.ip++]);
+    table_set(&vm.globals, name, vm.top[-1]);
+    DISPATCH();
+
+GET_GLOBAL: {
+    String *name = AS_STRING(values[*vm.ip++]);
+    Value value;
+    if (!table_get(&vm.globals, name, &value)) {
+        runtime_error("Undefined variable '%s'.", name->data);
+        return INTERPRET_RUNTIME_ERROR;
+    }
+    push(value);
+    DISPATCH();
+}
 
 TRUE:
     push(BOOL_VAL(true));
@@ -198,6 +219,8 @@ DIVIDE:
 RETURN:
     return INTERPRET_OK;
 }
+#undef BINARY_OP
+#undef DISPATCH
 #pragma GCC diagnostic pop
 
 InterpretResult interpret(const char *source) {

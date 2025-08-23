@@ -21,7 +21,8 @@ typedef enum {
     OP_GREATER,
     OP_LESS,
     OP_RETURN,
-    OP_DEFINE_GLOBAL
+    OP_DEFINE_GLOBAL,
+    OP_GET_GLOBAL
 } OpCode;
 
 typedef struct {

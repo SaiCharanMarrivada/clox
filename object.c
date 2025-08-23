@@ -6,9 +6,6 @@
 #include "value.h"
 #include "vm.h"
 
-#define ALLOCATE_OBJECT(object, type) \
-    (object *)allocate_object(sizeof(object), type)
-
 static uint32_t hash_string(const char *key, int length) {
     uint32_t hash = 2166136261u;
     for (int i = 0; i < length; i++) {
@@ -34,8 +31,14 @@ String *make_string(int length) {
 }
 
 String *copy_string(const char *buffer, int length) {
-    String *string = make_string(length);
-    string->hash = hash_string(buffer, length);
+    uint32_t hash = hash_string(buffer, length);
+    // check if string is already interned
+    String *string = table_find_string(&vm.strings, buffer, length, hash);
+    if (string != NULL) {
+        return string;
+    }
+    string = make_string(length);
+    string->hash = hash;
     memcpy(string->data, buffer, length);
     string->data[length] = '\0';
     table_set(&vm.strings, string, NIL_VAL);
