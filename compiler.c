@@ -45,6 +45,7 @@ static void unary();
 static void number();
 static void literal();
 static void string();
+static uint8_t make_constant(Value value);
 
 ParseRule rules[] = {
     [TOKEN_LEFT_PAREN] = {grouping, NULL, PREC_NONE},
@@ -210,8 +211,30 @@ static void statement() {
     }
 }
 
+static void var_declaration() {
+    // identifier should follow after 'var'
+    consume(TOKEN_IDENTIFIER, "Expect a variable name");
+    Token name = parser.previous;
+    Value symbol = OBJECT_VAL(copy_string(name.start, name.length));
+    uint8_t global = make_constant(symbol);
+
+    if (match(TOKEN_EQUAL)) {
+        expression();
+    } else {
+        emit_byte(OP_NIL);
+    }
+
+    const char *message = "Expect ';' after variable declaration";
+    consume(TOKEN_SEMICOLON, message);
+    emit_bytes(OP_DEFINE_GLOBAL, global);
+}
+
 static void declaration() {
-    statement();
+    if (match(TOKEN_VAR)) {
+        var_declaration();
+    } else {
+        statement();
+    } 
 
     if (parser.panic_mode) {
         parser.panic_mode = false;

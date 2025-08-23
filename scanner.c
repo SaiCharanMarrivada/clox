@@ -37,8 +37,9 @@ static Token error_token(const char *message) {
 }
 
 static bool match(char expected) {
-    if (*scanner.current == '\0') return false;
-    if (*scanner.current != expected) return false;
+    if (*scanner.current == '\0' || *scanner.current != expected) {
+        return false;
+    }
     scanner.current++;
     return true;
 }
@@ -71,7 +72,9 @@ static void skip_whitespace_and_comments() {
     }
 }
 
-static TokenType check_keyword(int start, int length, const char *rest, TokenType type) {
+static TokenType check_keyword(
+    int start, int length, const char *rest, TokenType type
+) {
     if (scanner.current - scanner.start == start + length) {
         if (memcmp(scanner.start + start, rest, length) == 0) {
             return type;
@@ -91,9 +94,12 @@ static TokenType identifier_type() {
         case 'f':
             if (scanner.current - scanner.start > 1) {
                 switch (scanner.start[1]) {
-                    case 'a': return check_keyword(2, 3, "lse", TOKEN_FALSE);
-                    case 'o': return check_keyword(2, 1, "r", TOKEN_FOR);
-                    case 'u': return check_keyword(2, 1, "n", TOKEN_FUN);
+                    case 'a': 
+                        return check_keyword(2, 3, "lse", TOKEN_FALSE);
+                    case 'o': 
+                        return check_keyword(2, 1, "r", TOKEN_FOR);
+                    case 'u': 
+                        return check_keyword(2, 1, "n", TOKEN_FUN);
                 }
             }
             break;
@@ -112,8 +118,10 @@ static TokenType identifier_type() {
         case 't':
             if (scanner.current - scanner.start > 1) {
                 switch (scanner.start[1]) {
-                    case 'h': return check_keyword(2, 2, "is", TOKEN_THIS);
-                    case 'r': return check_keyword(2, 2, "ue", TOKEN_TRUE);
+                    case 'h': 
+                        return check_keyword(2, 2, "is", TOKEN_THIS);
+                    case 'r': 
+                        return check_keyword(2, 2, "ue", TOKEN_TRUE);
                 }
             }
             break;
@@ -126,7 +134,9 @@ static TokenType identifier_type() {
 }
 
 static Token identifier() {
-    while (isalnum(*scanner.current) || *scanner.current == '_') scanner.current++;
+    while (isalnum(*scanner.current) || *scanner.current == '_') {
+        scanner.current++;
+    }
     return make_token(identifier_type());
 }
 
@@ -143,7 +153,9 @@ static Token number() {
 
 static Token string() {
     while (*scanner.current != '"' && *scanner.current != '\0') {
-        if (*scanner.current == '\n') scanner.line++;
+        if (*scanner.current == '\n') {
+            scanner.line++;
+        }
         scanner.current++;
     }
 
@@ -158,10 +170,17 @@ Token scan_token() {
     skip_whitespace_and_comments();
     scanner.start = scanner.current;
 
-    if (*scanner.current == '\0') return make_token(TOKEN_EOF);
+    if (*scanner.current == '\0') {
+        return make_token(TOKEN_EOF);
+    }
 
-    if (*scanner.current == '_' || isalpha(*scanner.current)) return identifier();
-    if (isdigit(*scanner.current)) return number();
+    if (*scanner.current == '_' || isalpha(*scanner.current)) {
+        return identifier();
+    }
+
+    if (isdigit(*scanner.current)) {
+       return number();
+    }
 
     switch (*scanner.current++) {
         case '(':
