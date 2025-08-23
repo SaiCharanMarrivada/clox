@@ -10,9 +10,14 @@
 
 void init_table(Table *table) {
     table->count = 0;
-    table->capacity = 0;
-    table->keys = NULL;
-    table->values = NULL;
+    table->capacity = 8;
+    table->keys = ALLOCATE(String *, table->capacity);
+    table->values = ALLOCATE(Value, table->capacity);
+
+    for (int i = 0; i < 8; i++) {
+        table->keys[i] = NULL;
+        table->values[i] = NIL_VAL;
+    }
 }
 
 void free_table(Table *table) {
@@ -57,8 +62,8 @@ static void rehash_table(Table *table, int new_capacity) {
 
 
 bool table_set(Table *table, String *key, Value value) {
-    if (table->count + 1 > table->capacity * LOAD_FACTOR) {
-        int capacity = GROW_CAPACITY(table->capacity);
+    if UNLIKELY(table->count + 1 > table->capacity * LOAD_FACTOR) {
+        int capacity = 2 * table->capacity;
         rehash_table(table, capacity);
     }
     int capacity = table->capacity;
