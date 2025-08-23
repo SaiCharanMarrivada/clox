@@ -31,10 +31,13 @@ typedef struct {
 #define AS_NUMBER(value) ((value).as.number)
 #define AS_OBJECT(value) ((value).as.object)
 
-#define BOOL_VAL(value) ((Value){VAL_BOOL, {.boolean = value}})
-#define NIL_VAL ((Value){VAL_NIL, {.number = 0}})
-#define NUMBER_VAL(value) ((Value){VAL_NUMBER, {.number = value}})
-#define OBJECT_VAL(value) ((Value){VAL_OBJECT, {.object = (Object *)value}})
+#define BOOL_VAL(value) \
+    ((Value){.type = VAL_BOOL, .as = {.boolean = value}})
+#define NIL_VAL ((Value){.type = VAL_NIL, .as = {.number = 0}})
+#define NUMBER_VAL(value) \
+    ((Value){.type = VAL_NUMBER, .as = {.number = value}})
+#define OBJECT_VAL(value) \
+    ((Value){.type = VAL_OBJECT, .as = {.object = (Object *)value}})
 #define OBJECT_TYPE(value) (AS_OBJECT(value)->type)
 
 typedef struct {

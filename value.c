@@ -29,20 +29,12 @@ void free_value_array(ValueArray *array) {
 }
 
 bool is_equal(Value a, Value b) {
-    if (a.type != b.type) return false;
-
-    switch (a.type) {
-        case VAL_BOOL:
-            return AS_BOOL(a) == AS_BOOL(b);
-        case VAL_NIL:
-            return true;
-        case VAL_NUMBER:
-            return AS_NUMBER(a) == AS_NUMBER(b);
-        case VAL_OBJECT:
-            return AS_OBJECT(a) == AS_OBJECT(b);
-        default:
-            UNREACHABLE();
-    }
+    // SAFETY: This is safe because every Value is constructed via
+    // designated initialization. That guarantees that any fields
+    // not explicitly set — including padding bytes — are zeroed.
+    // Therefore the entire object representation is deterministic,
+    // and `memcmp(&a, &b, sizeof(Value))` is a correct equality check.
+    return memcmp(&a, &b, sizeof(Value)) == 0;
 }
 
 void print_value(Value value) {
