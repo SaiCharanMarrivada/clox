@@ -33,8 +33,8 @@ void free_table(Table *table) {
 static void rehash_table(Table *table, int new_capacity) {
     String **keys = ALLOCATE(String *, new_capacity);
     Value *values = ALLOCATE(Value, new_capacity);
-    memset(table->keys, 0, new_capacity * sizeof(String *));
-    memset(table->values, 0, new_capacity * sizeof(Value));
+    memset(keys, 0, new_capacity * sizeof(String *));
+    memset(values, 0, new_capacity * sizeof(Value));
 
     String **old_keys = table->keys;
     Value *old_values = table->values;
