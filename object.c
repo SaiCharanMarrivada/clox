@@ -26,35 +26,20 @@ static Object *allocate_object(size_t size, ObjectType type) {
     return object;
 }
 
-String *allocate_string(char *buffer, int length, uint32_t hash) {
-    String *string = ALLOCATE_OBJECT(String, STRING);
+String *make_string(int length) {
+    String *string = 
+        (String *)allocate_object(sizeof(String) + length + 1, STRING);
     string->length = length;
-    string->data = buffer;
-    string->hash = hash;
-    table_set(&vm.strings, string, NIL_VAL);
     return string;
 }
 
-String *take_string(char *buffer, int length) {
-    uint32_t hash = hash_string(buffer, length);
-    String *interned = table_find_string(&vm.strings, buffer, length, hash);
-    if (interned != NULL) {
-        FREE_ARRAY(char, buffer, length + 1);
-        return interned;
-    }
-    return allocate_string(buffer, length, hash);
-}
-
-String *copy_string(const char *data, int length) {
-    uint32_t hash = hash_string(data, length);
-    String *interned = table_find_string(&vm.strings, data, length, hash);
-    if (interned != NULL) {
-        return interned;
-    }
-    char *buffer = ALLOCATE(char, length + 1); // +1 for NULL character
-    memcpy(buffer, data, length);
-    buffer[length] = '\0';
-    return allocate_string(buffer, length, hash);
+String *copy_string(const char *buffer, int length) {
+    String *string = make_string(length);
+    string->hash = hash_string(buffer, length);
+    memcpy(string->data, buffer, length);
+    string->data[length] = '\0';
+    table_set(&vm.strings, string, NIL_VAL);
+    return string;
 }
 
 void print_object(Value value) {

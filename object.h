@@ -20,8 +20,8 @@ struct Object {
 struct String {
     Object object;
     int length;
-    char *data;
     uint32_t hash;
+    char data[];
 };
 
 static inline bool is_objecttype(Value value, ObjectType type) {
@@ -29,7 +29,7 @@ static inline bool is_objecttype(Value value, ObjectType type) {
 }
 
 String *copy_string(const char *data, int length);
-String *take_string(char *data, int length);
+String *make_string(int length);
 void print_object(Value value);
 #endif
 

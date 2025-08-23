@@ -171,11 +171,10 @@ ADD: {
         String *s1 = AS_STRING(a);
         String *s2 = AS_STRING(b);
         int length = s1->length + s2->length;
-        char *data = ALLOCATE(char, length + 1);
-        memcpy(data, s1->data, s1->length);
-        memcpy(data + s1->length, s2->data, s2->length);
-        data[length] = '\0';
-        String *result = take_string(data, length);
+        String *result = make_string(length);
+        memcpy(result->data, s1->data, s1->length);
+        memcpy(result->data + s1->length, s2->data, s2->length);
+        result->data[length] = '\0';
         push(OBJECT_VAL(result));
         DISPATCH();
     } else if (IS_NUMBER(a) && IS_NUMBER(b)) {
@@ -197,8 +196,6 @@ DIVIDE:
     BINARY_OP(NUMBER_VAL, /);
 
 RETURN:
-    UNREACHABLE(); // currently
-    print_value(pop());
     return INTERPRET_OK;
 }
 #pragma GCC diagnostic pop
@@ -219,5 +216,3 @@ InterpretResult interpret(const char *source) {
     free_chunk(&chunk);
     return result;
 }
-
-
