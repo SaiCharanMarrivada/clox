@@ -212,6 +212,30 @@ static void statement() {
 
 static void declaration() {
     statement();
+
+    if (parser.panic_mode) {
+        parser.panic_mode = false;
+        // skip tokens until we find something like 
+        // a token boundary
+        while (parser.current.type != TOKEN_EOF) {
+            if (parser.previous.type == TOKEN_SEMICOLON) {
+                break;
+            }
+            switch (parser.current.type) {
+                case TOKEN_CLASS:
+                case TOKEN_FUN:
+                case TOKEN_VAR:
+                case TOKEN_FOR:
+                case TOKEN_IF:
+                case TOKEN_WHILE:
+                case TOKEN_PRINT:
+                case TOKEN_RETURN:
+                    break;
+                default: /*nothing*/; 
+            }
+            advance();
+        }
+    }
 }
 
 
