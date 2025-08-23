@@ -15,11 +15,8 @@ inline void init_table(Table *table, bool with_capacity) {
         table->capacity = 8;
         table->keys = ALLOCATE(String *, table->capacity);
         table->values = ALLOCATE(Value, table->capacity);
-
-        for (int i = 0; i < 8; i++) {
-            table->keys[i] = NULL;
-            table->values[i] = NIL_VAL;
-        }
+        memset(table->keys, 0, 8 * sizeof(String *));
+        memset(table->values, 0, 8 * sizeof(Value));
     } else {
         table->capacity = 0;
         table->keys = NULL;
@@ -36,11 +33,9 @@ void free_table(Table *table) {
 static void rehash_table(Table *table, int new_capacity) {
     String **keys = ALLOCATE(String *, new_capacity);
     Value *values = ALLOCATE(Value, new_capacity);
+    memset(table->keys, 0, new_capacity * sizeof(String *));
+    memset(table->values, 0, new_capacity * sizeof(Value));
 
-    for (int i = 0; i < new_capacity; i++) {
-        keys[i] = NULL;
-        values[i] = NIL_VAL;
-    }
     String **old_keys = table->keys;
     Value *old_values = table->values;
 
