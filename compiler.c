@@ -31,7 +31,7 @@ typedef enum {
     PREC_PRIMARY
 } Precedence;
 
-typedef void (*ParseFunction)();
+typedef void (*ParseFunction)(bool);
 
 typedef struct {
     ParseFunction prefix;
@@ -39,13 +39,13 @@ typedef struct {
     Precedence precedence;
 } ParseRule;
 
-static void grouping();
-static void binary();
-static void unary();
-static void number();
-static void literal();
-static void variable();
-static void string();
+static void grouping(UNUSED bool assignable);
+static void binary(UNUSED bool assignable);
+static void unary(UNUSED bool assignable);
+static void number(UNUSED bool assignable);
+static void literal(UNUSED bool assignable);
+static void variable(bool assignable);
+static void string(UNUSED bool assignable);
 static uint8_t make_constant(Value value);
 
 ParseRule rules[] = {
@@ -179,12 +179,17 @@ static void parse_precedence(Precedence precedence) {
         error("Expected expression.");
         return;
     }
-    prefix_rule();
+    bool assignable = precedence <= PREC_ASSIGNMENT;
+    prefix_rule(assignable);
 
     while (precedence <= rules[parser.current.type].precedence) {
         advance();
         ParseFunction infix_rule = rules[parser.previous.type].infix;
-        infix_rule();
+        infix_rule(assignable);
+    }
+
+    if (assignable && match(TOKEN_EQUAL)) {
+        error("Invalid assignment target.");
     }
 }
 
@@ -192,10 +197,15 @@ static void expression() {
     parse_precedence(PREC_ASSIGNMENT);
 }
 
-static void variable() {
+static void variable(bool assignable) {
     Token name = parser.previous;
     Value symbol = OBJECT_VAL(copy_string(name.start, name.length));
-    emit_bytes(OP_GET_GLOBAL, make_constant(symbol));
+    if (assignable && match(TOKEN_EQUAL)) {
+        expression();
+        emit_bytes(OP_SET_GLOBAL, make_constant(symbol));
+    } else {
+        emit_bytes(OP_GET_GLOBAL, make_constant(symbol));
+    }
 }
 
 static void print_statement() {
@@ -278,23 +288,23 @@ static uint8_t make_constant(Value value) {
     return (uint8_t)constant;
 }
 
-static void string() {
+static void string(UNUSED bool assignable) {
     String *s = copy_string(parser.previous.start + 1, parser.previous.length - 2);
     emit_bytes(OP_CONSTANT, make_constant(OBJECT_VAL(s)));
 }
 
-static void grouping() {
+static void grouping(UNUSED bool assignable) {
     expression();
     consume(TOKEN_RIGHT_PAREN, "Expect ')' after expression");
 }
 
 
-static void number() {
+static void number(UNUSED bool assignable) {
     double value = strtod(parser.previous.start, NULL);
     emit_bytes(OP_CONSTANT, make_constant(NUMBER_VAL(value)));
 }
 
-static void unary() {
+static void unary(UNUSED bool assignable) {
     TokenType operator_type = parser.previous.type;
 
     parse_precedence(PREC_UNARY);
@@ -313,7 +323,7 @@ static void unary() {
     }
 }
 
-static void binary() {
+static void binary(UNUSED bool assignable) {
     TokenType operator_type = parser.previous.type;
     ParseRule *rule = &rules[operator_type];
     parse_precedence((Precedence)(rule->precedence + 1));
@@ -354,7 +364,7 @@ static void binary() {
     }
 }
 
-static void literal() {
+static void literal(UNUSED bool assignable) {
     switch (parser.previous.type) {
         case TOKEN_FALSE:
             emit_byte(OP_FALSE);

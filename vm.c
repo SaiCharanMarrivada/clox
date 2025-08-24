@@ -113,7 +113,8 @@ static InterpretResult run() {
        [OP_GREATER] = &&GREATER,
        [OP_LESS] = &&LESS,
        [OP_DEFINE_GLOBAL] = &&DEFINE_GLOBAL,
-       [OP_GET_GLOBAL] = &&GET_GLOBAL
+       [OP_GET_GLOBAL] = &&GET_GLOBAL,
+       [OP_SET_GLOBAL] = &&SET_GLOBAL
     };
     DISPATCH();
 
@@ -144,6 +145,7 @@ NEGATE:
 DEFINE_GLOBAL: 
     String *name = AS_STRING(values[*vm.ip++]);
     table_set(&vm.globals, name, vm.top[-1]);
+    pop();
     DISPATCH();
 
 GET_GLOBAL: {
@@ -154,6 +156,16 @@ GET_GLOBAL: {
         return INTERPRET_RUNTIME_ERROR;
     }
     push(value);
+    DISPATCH();
+}
+
+SET_GLOBAL: {
+    String *name = AS_STRING(values[*vm.ip++]);
+    if (table_set(&vm.globals, name, vm.top[-1])) {
+        table_delete(&vm.globals, name);
+        runtime_error("Undefined variable '%s'.", name->data);
+        return INTERPRET_RUNTIME_ERROR;
+    }
     DISPATCH();
 }
 

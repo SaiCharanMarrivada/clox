@@ -8,5 +8,6 @@
 
 #define UNREACHABLE() __builtin_unreachable()
 #define UNLIKELY(condition) (__builtin_expect((condition), 0))
+#define UNUSED __attribute__((unused))
 
 #endif
